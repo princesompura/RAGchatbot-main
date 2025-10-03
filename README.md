@@ -31,11 +31,6 @@ A Retrieval-Augmented Generation (RAG) chatbot built using **Streamlit**, **Chro
 
 
 
-# No API Limits!
-
-- All core AI features run locally—no API keys, quotas, or billing required.
-- Works offline (except for initial model downloads).
-
 # How to Run
 
 1. Install dependencies:
