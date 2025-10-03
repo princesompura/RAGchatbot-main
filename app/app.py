@@ -1,6 +1,3 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import sqlite3
 
 import streamlit as st
@@ -27,8 +24,7 @@ class ChatApp:
         and initializes session state variables
         """
         # Ensure the docs folder exists
-        if not os.path.exists("docs"):
-            os.makedirs("docs")
+        os.makedirs("docs", exist_ok=True)
 
         # Configurations and session state initialization
         st.set_page_config(page_title="RAG Chatbot")
