@@ -1,6 +1,6 @@
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
@@ -68,9 +68,7 @@ def get_vectorstore(pdfs, from_session_state=False):
     - vectordb or None: The created or retrieved vectorstore. Returns None if loading from session state and the database does not exist
     """
     load_dotenv()
-    import os
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    embedding = OpenAIEmbeddings(openai_api_key=openai_api_key, model="text-embedding-ada-002")
+    embedding = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     if from_session_state and os.path.exists("Vector_DB - Documents"):
         # Retrieve vectorstore from existing one
         vectordb = Chroma(persist_directory="Vector_DB - Documents", embedding_function=embedding)

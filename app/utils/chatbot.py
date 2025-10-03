@@ -1,6 +1,6 @@
 import streamlit as st
 from collections import defaultdict
-from langchain_openai import ChatOpenAI
+from transformers import pipeline
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.chains import create_retrieval_chain
@@ -20,9 +20,8 @@ def get_context_retriever_chain(vectordb):
     # Load environment variables (gets api keys for the models)
     load_dotenv()
     # Initialize the model, set the retreiver and prompt for the chatbot
-    import os
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4.1", temperature=0.2)
+    # Use HuggingFace pipeline for local chat model
+    llm = pipeline('text-generation', model='mistralai/Mistral-7B-Instruct-v0.2')
     retriever = vectordb.as_retriever()
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are a chatbot. You'll receive a prompt that includes a chat history and retrieved content from the vectorDB based on the user's question. Your task is to respond to the user's question using the information from the vectordb, relying as little as possible on your own knowledge. If the user asks generic questionss, answer them but also tell them. Answer the questions from this context: {context}"),
