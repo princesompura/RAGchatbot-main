@@ -31,36 +31,62 @@ A Retrieval-Augmented Generation (RAG) chatbot built using **Streamlit**, **Chro
 
 
 
-# How to Run
 
-1. Install dependencies:
+## Features
+
+- Upload PDF documents and chat with them using Retrieval-Augmented Generation (RAG)
+- ChromaDB for vector storage and semantic search
+- Embeddings: `sentence-transformers/all-MiniLM-L6-v2`
+- Chat: `distilgpt2` (Hugging Face Transformers)
+- OCR fallback for scanned PDFs (Tesseract, Poppler)
+- Streamlit UI for upload and chat
+
+## Quickstart
+
+1. Install Python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-2. Start the app:
+2. Install system dependencies (for OCR):
+   - On Ubuntu: `sudo apt install poppler-utils tesseract-ocr`
+   - On Windows: Download and install [Poppler](http://blog.alivate.com.au/poppler-windows/) and [Tesseract](https://github.com/tesseract-ocr/tesseract)
+3. Run the app:
    ```bash
    streamlit run app/app.py
    ```
-3. Upload PDFs and start chatting!
 
-# Notes
+## Tech Stack
 
-- Large chat models may require significant RAM/CPU/GPU. For best performance, use a machine with a good CPU or GPU, or switch to a smaller model if needed.
-- OCR features require Tesseract and Poppler system packages (see `packages.txt`).
+- Python
+- Streamlit
+- ChromaDB
+- LangChain
+- Hugging Face Transformers
+- SentenceTransformers
+- Tesseract OCR
+- Poppler
 
-# Example Models
+## File Overview
 
-- Embeddings: `sentence-transformers/all-MiniLM-L6-v2`
-- Chat: `mistralai/Mistral-7B-Instruct-v0.2` (can be swapped for smaller/faster models)
+- `app/app.py`: Main Streamlit app
+- `app/utils/prepare_vectordb.py`: Document loading, chunking, embedding
+- `app/utils/chatbot.py`: Chat logic
+- `app/utils/ocr.py`: OCR fallback
+- `app/utils/save_docs.py`: Save uploaded docs
+- `app/utils/session_state.py`: Session management
+- `requirements.txt`: Python dependencies
+- `packages.txt`: System dependencies
 
-# Customization
+## Example Usage
 
-- To use a different chat or embedding model, edit `app/utils/chatbot.py` and `app/utils/prepare_vectordb.py`.
+1. Upload a PDF
+2. Ask questions about its content
+3. The chatbot retrieves relevant context and answers using the local model
 
-# Troubleshooting
+## Credits
 
-- If the app is slow or crashes, try a smaller chat model or check your system resources.
-- For OCR issues, ensure system dependencies in `packages.txt` are installed.
+- Built with Streamlit, ChromaDB, LangChain, Hugging Face Transformers, SentenceTransformers
+- OCR via Tesseract and Poppler
 
 
 

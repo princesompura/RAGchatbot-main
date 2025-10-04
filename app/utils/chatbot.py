@@ -1,37 +1,15 @@
 import streamlit as st
 from collections import defaultdict
 from transformers import pipeline
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from dotenv import load_dotenv
 
-def get_context_retriever_chain(vectordb):
+
+@st.cache_resource(show_spinner=False)
+def get_cached_model():
     """
-    Create a context retriever chain for generating responses based on the chat history and vector database
-
-    Parameters:
-    - vectordb: Vector database used for context retrieval
-
-    Returns:
-    - retrieval_chain: Context retriever chain for generating responses
+    Load and cache the Hugging Face text-generation pipeline for distilgpt2.
     """
-    # Load environment variables (gets api keys for the models)
-    load_dotenv()
-    # Initialize the model, set the retreiver and prompt for the chatbot
-    # Use HuggingFace pipeline for local chat model
-    llm = pipeline('text-generation', model='mistralai/Mistral-7B-Instruct-v0.2')
-    retriever = vectordb.as_retriever()
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a chatbot. You'll receive a prompt that includes a chat history and retrieved content from the vectorDB based on the user's question. Your task is to respond to the user's question using the information from the vectordb, relying as little as possible on your own knowledge. If the user asks generic questionss, answer them but also tell them. Answer the questions from this context: {context}"),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}")
-    ])
-    # Create chain for generating responses and a retrieval chain
-    chain = create_stuff_documents_chain(llm=llm, prompt=prompt)
-    retrieval_chain = create_retrieval_chain(retriever, chain)
-    return retrieval_chain
+    return pipeline('text-generation', model='distilgpt2')
 
 def get_response(question, chat_history, vectordb):
     """
@@ -46,9 +24,17 @@ def get_response(question, chat_history, vectordb):
     - response: The generated response
     - context: The context associated with the response
     """
-    chain = get_context_retriever_chain(vectordb)
-    response = chain.invoke({"input": question, "chat_history": chat_history})
-    return response["answer"], response["context"]
+    # Retrieve relevant context from vectordb
+    context_docs = vectordb.similarity_search(question, k=3) if vectordb else []
+    context = ' '.join([doc.page_content for doc in context_docs])
+    # Truncate context to avoid exceeding model input limit (distilgpt2: 512 tokens ~ 400 chars)
+    max_context_length = 400
+    context = context[:max_context_length]
+    prompt = f"Context: {context}\nQuestion: {question}"
+    llm = get_cached_model()
+    result = llm(prompt)
+    answer = result[0]['generated_text'] if result and 'generated_text' in result[0] else str(result)
+    return answer, context_docs
 
 def chat(chat_history, vectordb):
     """
